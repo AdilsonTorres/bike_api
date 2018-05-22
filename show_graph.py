@@ -9,11 +9,10 @@ from matplotlib.ticker import FuncFormatter, MaxNLocator
 
 ROOT_PATH = sys.path[0]
 
-# TODO: Receive as parameter or create all stations graphs.
-station = 101 - 1
 stations = [
     101,
     105,
+    232,
 ]
 
 
@@ -22,7 +21,12 @@ def format_fn(tick_val, tick_pos):
 
 
 def create_graph(data_time, available_bikes, available_docks, station):
-    # available =
+    fig_size = plt.rcParams["figure.figsize"]
+    print("Current size:", fig_size)
+    fig_size[0] = 12
+    fig_size[1] = 9
+
+    plt.rcParams["figure.figsize"] = fig_size
     p1 = plt.bar(x=data_time, height=available_bikes)
     p2 = plt.bar(x=data_time, height=available_docks, bottom=available_bikes)
     # plt.gcf().autofmt_xdate()
@@ -39,6 +43,7 @@ def create_graph(data_time, available_bikes, available_docks, station):
         print("create log directory.")
         os.makedirs(graph_path)
     plt.savefig(graph_path + "/" + "station_{}.png".format(station))
+    plt.close()
 
 
 def mount_data_graph(station, log_files):
@@ -46,13 +51,19 @@ def mount_data_graph(station, log_files):
     available_bikes = []
     available_docks = []
 
-    for file in log_files:
+    k = 0
+    j = len(log_files)
+
+    for i in range(k, j):
         contents = ''
+        file = log_files[i]
         with open(file) as f:
             contents = f.readlines()
 
-        available_bikes.append(int(contents[2 + station * 3 - 2 + 1].split(' ')[1]))
-        available_docks.append(int(contents[2 + station * 3 - 2 + 2].split(' ')[1]))
+        bikes = int(contents[station * 3 - 2 + 1].split(' ')[1])
+        available_bikes.append(bikes)
+        docks = int(contents[station * 3 - 2 + 2].split(' ')[1])
+        available_docks.append(docks)
 
         year = int(file.split('/logs/')[1].split('-')[0][0:4])
         month = int(file.split('/logs/')[1].split('-')[0][4:6])
@@ -62,9 +73,8 @@ def mount_data_graph(station, log_files):
 
         time = datetime.datetime(year, month, day, hour, minutes)
         data_time.append(time.timestamp() / 10000)
-        # i += 1
 
-    create_history(data_time, available_bikes, available_docks)
+    create_graph(data_time, available_bikes, available_docks, station)
 
 
 def main(argv):
@@ -72,9 +82,8 @@ def main(argv):
     log_files = glob.glob(log_path)
     log_files.sort()
 
-    if len(stations) > 1:
-
-
+    for station in stations:
+        mount_data_graph(station, log_files)
 
 
 if __name__ == "__main__":

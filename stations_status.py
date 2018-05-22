@@ -22,8 +22,8 @@ def main(argv):
     logfile.write("Number total fo stations: {}\n".format(num_stations))
 
     if status_result.status_code == requests.codes.ok:
-        for station in range(num_stations):
-            logfile.write("Station: {}\n".format(station))
+        for station in range(0, num_stations):
+            logfile.write("Station: {}\n".format(status_result.json()['data']['stations'][station]['station_id']))
             logfile.write("num_bikes_available: {}\n".format(status_result.json()['data']['stations'][station]['num_bikes_available']))
             logfile.write("num_docks_available: {}\n".format(status_result.json()['data']['stations'][station]['num_docks_available']))
 
